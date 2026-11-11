@@ -38,6 +38,14 @@
 \section{Abstract}
 Reducing real-world trial and error has long been a central goal of decision making, and generative simulators advance this goal by modeling the evolution of future states. An even more challenging yet meaningful task is simulating how disturbance events (e.g., accidents) propagate their impacts across real-world networks. The existing approaches fall short of modeling both structured attributes and unstructured semantics of events, and capturing topological structures in simulating network event evolution. Therefore, we are motivated to propose Net-Ev2 (Network Event Evolution), a novel generative simulator that jointly leverages event cues while preserving network topology in simulations. Specifically, the framework consists of two stages, namely structure-guided masked pretraining and topology-aware diffusion process, which is achieved by U-Net-like graph downsampling and upsampling during denoising. At inference time, Net-Ev2can generate simulations using natural-language event input only, with greater flexibility for practical usage. Furthermore, we introduce Net-Ev2-6.5M, a multimodal benchmark of aligned event and network traffic data across four large-scale road networks, as well as a new topology-aware metric, namely JL-MMD, to evaluate topological fidelity in generated network dynamics. Extensive experiments demonstrate the state-of-the-art performance and strong generalization ability of Net-Ev2. Code is made available at https://github.com/Guangyu4/Net-Ev-2
 
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figs/teaser.png}
+\label{fig:teaser}
+\caption{Generative simulation for network event evolution}
+\end{figure}
+
 \section{Keywords}
 Generative Simulator, Network Event Evolution, Diffusion Models, Johnson-Lindenstrauss Lemma
 
@@ -56,10 +64,91 @@ Generative Simulator, Network Event Evolution, Diffusion Models, Johnson-Lindens
   \item Structured data harder to obtain than unstructured data in real-wordld applications, and ideally model should use structure information for training but perform well in the absence of it
   \item Networks have graph topology, events propogate on edges. Denoiser models fail to capture propogation details
   \item This issue rarely considered in evaluation, topology-aware metrics are largely missing
+  \item Paper proposes Net-Ev$^2$ generative simulator for network event evolution and associated multimodel benchmark (6.5M events)
+  \item introduce topology aware metric JL-MMD, inspired by Johnson-Lindenstrauss lemma
 \end{itemize}
 
+\textbf{Contributions:}
+\begin{itemize}
+  \item Problem: simulating evolution of network states under textual event conditions
+  \item Propose the Net-Ev$^2$ generative model, which combines masked pretraiing with a topology-aware denoiser
+  \item Net-Ev$^2$-6.5M a multi-modal benchmark of aligned event text and network traffic data
+  \item JL-MMD a metric based on Johnson-Lindenstrauss random projection to evaluate topological fidelity on generated network dynamics
+\end{itemize}
+
+\section{Preliminaries}
+
+Model a network graph as $G=(V,A)$ where $V$ is a set of $N$ sensor nodes and $A\in\mathbb{R}^{N\times N}$ is the adjacency matrix representing the network topology. $X\in \mathbf{R}^{T\times N}$ denote a sequence of network snapshots (e.g. traffic volume) over $T$ steps. For each efvent $X$ is represented by a set of multi-structural attributes $E=E_{i_{i=1}}^M$, including a textual description $E_d$ and structured properties. Given these conditions as an initial state, the problem is to simulate realistic future states $\hat{X}$ that reflects how an even evolves and propogates over the network topology. 
+
+$$E=E_{i_{i=1}}^M\overset{G}{\rightarrow} \hat{X}\in\mathbf{R}^{T\times N}$$
+
+$E$ is comprised of $E=(E_d, E_n, E_t)$, corresponding to the textual description, spatial context, and impacted nodes in the egocentric subgraph (whatever that means), and temporal context, respectively.
+
+\section{Net-Ev2-6.5M Benchmark}
+
+New multimodal benchmark integrating signal observations from LargeST~\cite{liu2023largest} and event records from LSTW~\cite{moosavi2019short}. Covers San Diegeo, Greated Bay Area, Greater Los Angeles, and California. Previous little work combining traffic and event datasets, so matched using the following conditions
+\begin{enumerate}
+  \item \textit{Event-traffic alignment} Align sensor readings to incident reports and weather events
+  \item \textit{Event descriptions} Attach weather descriptions to weather events using LLMs matching style as LSTW incident events
+  \item \textit{Multi-structural sample organization} 6.5M samples consisting of (1) textual description $E_d$, event descrioptoin encoded by text encoder; (2) network snapshots $X\in \mathbf{R}^{T\times N}$, the subsequent time steps, (3) Spatial context $E_n$, the target node and its n-hop neighbors over the network; Teemporat context $E_t$ the event's start and end timestamp
+\end{enumerate}
+
+\begin{table}[h]
+\centering
+\caption{Summary of Net-Ev2-6.5M benchmark (*no detailed incident types are reported for GLA and GBA in LSTW).}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrrrrrrrr}
+\toprule
+ & & \multicolumn{7}{c}{Incident Events} & \multicolumn{6}{c}{Weather Events} \\
+\cmidrule(lr){3-9} \cmidrule(lr){10-15}
+Subset & Total & Accident & Broken-Vehicle & Congestion & Construction & Event & Lane-Blocked & Flow-Incident & Severe-Cold & Fog & Hail & Rain & Snow & Storm \\
+\midrule
+SD & 836,694 & 5,804 & 2,049 & 33,933 & 2,676 & 2 & 3,847 & 3,536 & 440,186 & 740 & 82,308 & 265,359 & 810 & 561 \\
+GLA & 654,420 & *51,086 & 0 & 0 & 0 & 0 & 0 & 0 & 237,202 & 1,536 & 243,411 & 125,394 & 1,328 & 99 \\
+GBA & 1,201,201 & *22,639 & 0 & 0 & 0 & 0 & 0 & 0 & 329,502 & 3,442 & 383,211 & 462,014 & 3,888 & 83 \\
+CA & 3,824,877 & 33,427 & 9,709 & 189,586 & 11,195 & 33 & 23,216 & 15,919 & 1,252,645 & 3,252 & 338,278 & 1,965,992 & 15,980 & 8,145 \\
+\midrule
+Total & 6,517,192 & 112,956 & 11,758 & 223,519 & 13,871 & 35 & 27,063 & 19,455 & 2,259,535 & 8,970 & 1,047,208 & 2,818,759 & 22,006 & 8,888 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\section{Methodology}
+
+Input is a network snapshot sequence $X$, fed into encoder with spatio-temporal and structure guided masks, following a masked autoencoder design. Noise added to hidden representations during training, and topology aware denoiser removes it using pooling/unpooling operations to preserve network topology. Unstructured even conditions are injected vis AdaLN~\cite{ge2025t2s}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figs/mainfig_netev2.png}
+\caption{Net-Ev$^2$ framework: the upper illustrates the structure-guided masked pre-training; the lower depicts the topologyaware diffusion process}
+\label{fig:mainfig_netev2}
+\end{figure}
 
 
+\subsection{Structure guided MAE}
+
+MAE compresses traffic observations to latent space where diffusion operates efficiently. During training use multi-structural event information to guide masking strategies. Apparently a better method than encoding as special tokens.
+
+\subsubsection{Spatio-temporal masking}
+Binary masks $\mathbf{M}^{(t)}, \mathbf{M}^{(s)}\in \{-0,1\}^{T\times N}$ by selecting random subsets of $\mathcal{T} \lfloor \rho\cdot T$ and $\mathcal{S} \lfloor \rho\cdot S$ and setting masks to zero for both.
+
+\subsubsection{Structure-guided masking}
+Masking nodes $E_n$ and corresponding time windows $E_t$:
+
+\[
+  \textbf{M}^{(e)}_{:,j} =0\enspace\text{for}\enspace j\in E_n\qquad\textbf{M}^{(e)}_{i,:}=0\enspace\text{for}\enspace i < \text{max}(E_t)
+\]
+
+
+where $E_t$ denotes the events of temporal span, and i < max$(E_t)$ masks teh entire event duration
+
+\subsubsection{Variational encoder-decoder architechture} adopts a variational formulation~\cite{jordan1998variational} for generalizability. Encode masked input to latent representation where decoder reconstructs from original signal. The encoder projects the input to latent space then applies transformer layers:
+
+\[
+  [\mu, \text{log}\sigma^2] = \text{TransformerEncoder}(\text{Linear}(X\odot M))
+\]
+
+Where we then sample $z = \mu + \sigma \odot \xi$ with $\xi \sim \mathcal{N}(0, \textbf{I})$ during training, and use $z=\mu$ at inference. The decoder then maps back $z$ to original space $\hat{X}\in\mathbf{R}^{T\times N}$
 
 
 % \section{Methods}

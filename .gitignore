@@ -8,3 +8,7 @@
 *.out
 *.synctex.gz
 *.toc
+
+# vscode whatever
+.vscode
+CLAUDE.md
