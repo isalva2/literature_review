@@ -1,0 +1,92 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage[numbers]{natbib}
+
+% ---------------------------------------------------------------------------
+% Paper details -- fill these in for each review
+% ---------------------------------------------------------------------------
+\newcommand{\papertitle}{Net-Ev$^2$: A Generative Simulator for Network Event Evolution}
+\newcommand{\paperauthors}{Guangyu Wang, Zhonan Wang}
+\newcommand{\papervenue}{32nd ACM SIGKDD Conference on Knowledge Discovery and Data Mining V.2}
+\newcommand{\paperlink}{\url{http://arxiv.org/abs/2606.12494}}
+\newcommand{\paperkey}{wang_net-ev2_2026} % BibTeX key in references.bib
+\newcommand{\reviewdate}{\today}
+
+\title{Review: \papertitle}
+\author{}
+\date{\reviewdate}
+
+\begin{document}
+
+\maketitle
+
+\begin{tabular}{@{}ll@{}}
+  \textbf{Authors:} & \paperauthors \\
+  \textbf{Published:} & \papervenue \\
+  \textbf{Link:} & \paperlink \\
+  \textbf{Citation:} & \cite{\paperkey} \\
+\end{tabular}
+
+\section{Abstract}
+Reducing real-world trial and error has long been a central goal of decision making, and generative simulators advance this goal by modeling the evolution of future states. An even more challenging yet meaningful task is simulating how disturbance events (e.g., accidents) propagate their impacts across real-world networks. The existing approaches fall short of modeling both structured attributes and unstructured semantics of events, and capturing topological structures in simulating network event evolution. Therefore, we are motivated to propose Net-Ev2 (Network Event Evolution), a novel generative simulator that jointly leverages event cues while preserving network topology in simulations. Specifically, the framework consists of two stages, namely structure-guided masked pretraining and topology-aware diffusion process, which is achieved by U-Net-like graph downsampling and upsampling during denoising. At inference time, Net-Ev2can generate simulations using natural-language event input only, with greater flexibility for practical usage. Furthermore, we introduce Net-Ev2-6.5M, a multimodal benchmark of aligned event and network traffic data across four large-scale road networks, as well as a new topology-aware metric, namely JL-MMD, to evaluate topological fidelity in generated network dynamics. Extensive experiments demonstrate the state-of-the-art performance and strong generalization ability of Net-Ev2. Code is made available at https://github.com/Guangyu4/Net-Ev-2
+
+\section{Keywords}
+Generative Simulator, Network Event Evolution, Diffusion Models, Johnson-Lindenstrauss Lemma
+
+\section{Introduction}
+
+\begin{itemize}
+  \item Generative simulators $\rightarrow$ state evolution over time $\rightarrow$ closed-loop evaluation $\rightarrow$ scalable data generation
+  \item Generative models come in two design paradigms:
+    \begin{enumerate}
+      \item Network to visual-like representations for diffusion models: line graphs, field transforms, or data rendered as RGB images. Struggles to capture full complexity of network evolution
+      \item Diffusion architechtures: flow matching, denoising diffusion probabilistic models. Better fit for variable length sequences, multivariate dependencies, long-term trends etc.
+    \end{enumerate}
+  \item Network evolution poses challenges for existing methods, and events can have textual and quantitative modalities
+  \item \textbf{Example:} unstructured text (I-8 Eastbound and Significant Traffic), quantitiative attributes such as node indices and timespans
+  \item Problematic to combine modalities, language encoders such as BERT struggle with numerical data as input
+  \item Structured data harder to obtain than unstructured data in real-wordld applications, and ideally model should use structure information for training but perform well in the absence of it
+  \item Networks have graph topology, events propogate on edges. Denoiser models fail to capture propogation details
+  \item This issue rarely considered in evaluation, topology-aware metrics are largely missing
+\end{itemize}
+
+
+
+
+
+% \section{Methods}
+% % How do the authors approach the problem? Data, models, experimental setup.
+
+% \section{Key Results}
+% \begin{itemize}
+%   \item
+% \end{itemize}
+
+% \section{Strengths}
+% \begin{itemize}
+%   \item
+% \end{itemize}
+
+% \section{Weaknesses and Open Questions}
+% \begin{itemize}
+%   \item
+% \end{itemize}
+
+% \section{Relevance and Takeaways}
+% % How does this relate to my work? What ideas are worth keeping?
+
+% \section{Notes}
+% % Free-form notes, quotes (with page numbers), follow-up reading.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

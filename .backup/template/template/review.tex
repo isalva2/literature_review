@@ -1,0 +1,71 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage[numbers]{natbib}
+
+% ---------------------------------------------------------------------------
+% Paper details -- fill these in for each review
+% ---------------------------------------------------------------------------
+\newcommand{\papertitle}{Title of the Paper}
+\newcommand{\paperauthors}{First Author, Second Author, \ldots}
+\newcommand{\papervenue}{Venue / Journal, Year}
+\newcommand{\paperlink}{\url{https://doi.org/...}}
+\newcommand{\paperkey}{author2024example} % BibTeX key in references.bib
+\newcommand{\reviewdate}{\today}
+
+\title{Review: \papertitle}
+\author{}
+\date{\reviewdate}
+
+\begin{document}
+
+\maketitle
+
+\begin{tabular}{@{}ll@{}}
+  \textbf{Authors:} & \paperauthors \\
+  \textbf{Published:} & \papervenue \\
+  \textbf{Link:} & \paperlink \\
+  \textbf{Citation:} & \cite{\paperkey} \\
+\end{tabular}
+
+\section{Summary}
+% One or two paragraphs: what the paper does, in your own words.
+
+\section{Problem and Motivation}
+% What question is being addressed, and why does it matter?
+
+\section{Methods}
+% How do the authors approach the problem? Data, models, experimental setup.
+
+\section{Key Results}
+\begin{itemize}
+  \item
+\end{itemize}
+
+\section{Strengths}
+\begin{itemize}
+  \item
+\end{itemize}
+
+\section{Weaknesses and Open Questions}
+\begin{itemize}
+  \item
+\end{itemize}
+
+\section{Relevance and Takeaways}
+% How does this relate to my work? What ideas are worth keeping?
+
+\section{Notes}
+% Free-form notes, quotes (with page numbers), follow-up reading.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
