@@ -140,7 +140,7 @@ Masking nodes $E_n$ and corresponding time windows $E_t$:
 \]
 
 
-where $E_t$ denotes the events of temporal span, and i < max$(E_t)$ masks teh entire event duration
+where $E_t$ denotes the events of temporal span, and i < max$(E_t)$ masks the entire event duration
 
 \subsubsection{Variational encoder-decoder architechture} adopts a variational formulation~\cite{jordan1998variational} for generalizability. Encode masked input to latent representation where decoder reconstructs from original signal. The encoder projects the input to latent space then applies transformer layers:
 
@@ -150,33 +150,76 @@ where $E_t$ denotes the events of temporal span, and i < max$(E_t)$ masks teh en
 
 Where we then sample $z = \mu + \sigma \odot \xi$ with $\xi \sim \mathcal{N}(0, \textbf{I})$ during training, and use $z=\mu$ at inference. The decoder then maps back $z$ to original space $\hat{X}\in\mathbf{R}^{T\times N}$
 
+\subsubsection{Training Objective}
 
-push test
+Variational encoder-decoder is fed temporal, spatial, and structure-guided masked inputs and outputs a final result fused by residual addition $\hat{X} = \hat{X}^{(t)} + \hat{X}^{(s)} + \hat{X}^{(e)}$. Model is optimzed on a loss function that combines reconstruction accuracy and KL-divergence regularization:
+
+\[
+  \mathcal{L}_{\text{MAE}}=\Vert\textbf{X} - \hat{\textbf{X}}\Vert_2^2a+w\sum_{r\in \{t, s, e \}} D_\text{KL}(q_r(\textbf{z}|\textbf{X},\textbf{M}^{(r)})\Vert(\textbf{z}))
+\]
+
+where $p(\textbf{z}=\mathcal{N}(0, \textbf{I}))$ is the prior distribution and each $D_\text{KL}$ term regularizes the latext space to smooth for subsequent diffusion.
+
+\subsection{Topology-aware diffusion moddel}
+
+\subsubsection{Diffusion process}
+Adopts DDPM~\cite{ho2020denoising} method in latent space. For latent representation $\textbf{z}_0$ forward process adds Gaussian noise $q(\textbf{z}_t\vert\textbf{z}_0)$ with noise schedule $\{\beta_t\}$. The reverse process learns to denoise conditioned on $\textbf{c}$:
+
+\[
+  p\theta(\textbf{z}_{t-1}|\textbf{z}_t, \textbf{c}) = \mathcal{N}(\textbf{z}_{t-1}, \mu_\theta(\textbf{z}_t, t, \textbf{c}), \overset{\sim}{\beta_t}, \textbf{I})
+\]
+
+\subsubsection{Graph U-Net architecture}
+
+Event conditions are incorporated into Graph U-Net to preserve network topology, since eah Graph U-Net block propagates information and encourages model to learn inter-node relationshiops. Graph U-Net takes $(\textbf{z}_t, t, \textbf{c})$ inputs and predicts the noise $\epsilon_\theta$. Consists of encoder-bottleneck-decoder with $L$ levels and skip connections. Encoder pools graph from $G^{(0)}$ to $G^{(L)}$, bottleneck injects conditioning, and decoder pools back to original topology.
+
+\textbf{Graph Pooling} Learnable pooling used to build hierarchical representations while preserving topology. Projection later computes node importance score $\pi = \text{sigmoid}(\text{Linear}(\textbf{H}^{(l)}))\in\mathbf{R}^{N_l}$, and top-$k$ nodes selected $\mathcal{J} = \text{top-}k(\pi)$. Pooled features are then constructed as $\textbf{H}^{l+1}=\textbf{H}^{(l)}\mathcal{J}\odot\pi\mathcal{J}$, where $\pi\mathcal{J}$ serves as a gating mechanism, emphasizing informative nodes. 
+
+\textbf{Graph Transformer Block} At bottleneck, injects conditioning through AdaLN~\cite{ge2025t2s}. Different from standard layer normalization, AdaLN derives scale, shift, and gate, $\gamma$, $\delta$, $\lambda$ respectively, from conditioning vector $\textbf{c}$:
+
+\[
+  [\gamma, \delta\, \lambda] = \text{Linear}(\textbf{c}),\quad\textbf{AdaLN}(\textbf{H},\textbf{c})=\gamma\odot\text{LayerNorm}(\textbf{H})+\delta
+\]
+
+Each sub-layer applies AdaLN before its operation and uses the gate $\lambda$ so scale the residual, GCN$(\cdot)$ denotes a graph convolutional network, and Attention corresponding to standard transformer self-attention module:
+
+\begin{align*}
+      \textbf{H}_g &= \textbf{H}^{(L)}+\lambda_g\odot\text{GCN}(\text{AdaLN}(\textbf{H}^{(L), \textbf{c}}), \textbf{A}^{(L)})\\
+      \textbf{H}_a &= \textbf{H}_g + \lambda_a\odot \text{Attention}(\text{AdaLN}(\textbf{H}_g, \textbf{c}))\\
+      \textbf{H}_m &= \textbf{H}_a + \lambda_m\odot \text{MLP}()\text{AdaLN}(\textbf{H}_a, \textbf{c})
+\end{align*}
+
+\textbf{Graph Unpooling} decoder restores graph resolution by placing pooled features back to original positions using $(\textbf{H}^{(u-1)}, G^{(u-1)}) = \text{unpool}(\textbf{H}^{(u)}, \pi^{(u)}, \textbf{A}^{u-1})$, where GCN layers propogating information to unselected nodes. 
+
+\subsubsection{Conditionaing Mechanism}
+
+Condition diffusion on timestep and event text embedding $\textbf{E}_d$. Existing practice~\cite{ge2025t2s,zhang2025}. Time steps encoded using sinusoidal positional embeddings, text embedding obtained vie pre-trained BERT and combined to create conditioning vector \textbf{c}. Structured attributes guide representation learning from the masking objective but not required by denoiser at inference, allowing for scenario simulate from natural-langauge alone.
+
+\subsubsection{Training Objective}
+
+The denoiser is trained to predict noise added at each timestep:
+\[
+  \mathcal{L}_{\text{diff}} = \mathbb{E}_{t, \textbf{z}_0, \epsilon} \big[\Vert\epsilon-\epsilon_\theta(\textbf{z}, t, {c})\Vert_2^2\big]
+\]
+
+\subsubsection{Infrence}
+
+Start with Gaussian noise $\textbf{z}_{T_\text{diff}}\sim\mathcal{N}(0, \textbf{I})$ and iteratively denoise:
+
+\[
+  \textbf{z}_{t-1} = \frac{1}{\sqrt{\alpha_t}}
+  \Big(  
+    \textbf{z}_t - \frac{1-\alpha_t}{\sqrt{q-\bar{\alpha_t}}}\epsilon_\theta(\textbf{z}_t, t, \textbf{c})
+  \Big)
+  + \sqrt{\overset{\sim}{\beta_t}}\epsilon
+\]
+
+where $\epsilon\sim\mathcal{N}(0, \textbf{I})$ for $t>1$ and $\epsilon = 0$ for $t=1$. The final $\textbf{z}_0$ is decoded to obtain $\hat{\textbf{X}}$.
+
+\section{Results}
 
 
-% \section{Methods}
-% % How do the authors approach the problem? Data, models, experimental setup.
 
-% \section{Key Results}
-% \begin{itemize}
-%   \item
-% \end{itemize}
-
-% \section{Strengths}
-% \begin{itemize}
-%   \item
-% \end{itemize}
-
-% \section{Weaknesses and Open Questions}
-% \begin{itemize}
-%   \item
-% \end{itemize}
-
-% \section{Relevance and Takeaways}
-% % How does this relate to my work? What ideas are worth keeping?
-
-% \section{Notes}
-% % Free-form notes, quotes (with page numbers), follow-up reading.
 
 \bibliographystyle{plainnat}
 \bibliography{references}
