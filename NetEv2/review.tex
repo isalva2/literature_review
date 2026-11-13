@@ -9,6 +9,9 @@
 \usepackage{enumitem}
 \usepackage[hidelinks]{hyperref}
 \usepackage[numbers]{natbib}
+\usepackage{xcolor}
+% Dark mode: comment out the next line for normal black-on-white
+\AtBeginDocument{\pagecolor{black}\color{white}}
 
 % ---------------------------------------------------------------------------
 % Paper details -- fill these in for each review
@@ -216,10 +219,90 @@ Start with Gaussian noise $\textbf{z}_{T_\text{diff}}\sim\mathcal{N}(0, \textbf{
 
 where $\epsilon\sim\mathcal{N}(0, \textbf{I})$ for $t>1$ and $\epsilon = 0$ for $t=1$. The final $\textbf{z}_0$ is decoded to obtain $\hat{\textbf{X}}$.
 
-\section{Results}
+\section{Experiments}
 
 
+\begin{table}[htbp]
+  \centering
+  \caption{Performance comparison on Net-Ev2-6.5M benchmark over different horizons. (N/A indicates that all samples fall below the MRR@5 threshold)}
+  \label{tab:horizons}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{llcccccccccccccccc}
+    \toprule
+    & & \multicolumn{4}{c}{SD} & \multicolumn{4}{c}{GLA} & \multicolumn{4}{c}{GBA} & \multicolumn{4}{c}{CA} \\
+    \cmidrule(lr){3-6} \cmidrule(lr){7-10} \cmidrule(lr){11-14} \cmidrule(lr){15-18}
+    Methods & Steps & ED$\downarrow$ & C-FID$\downarrow$ & MRR@5$\uparrow$ & JL-MMD$\downarrow$ & ED$\downarrow$ & C-FID$\downarrow$ & MRR@5$\uparrow$ & JL-MMD$\downarrow$ & ED$\downarrow$ & C-FID$\downarrow$ & MRR@5$\uparrow$ & JL-MMD$\downarrow$ & ED$\downarrow$ & C-FID$\downarrow$ & MRR@5$\uparrow$ & JL-MMD$\downarrow$ \\
+    \midrule
+    Diffusion-TS & 24 & 34.84 & 43.35 & N/A & 1.04 & 60.16 & 43.31 & N/A & 0.92 & 67.28 & 42.23 & N/A & 0.91 & 126.60 & 44.93 & N/A & 0.96 \\
+                 & 48 & 35.11 & 48.50 & N/A & 0.91 & 60.72 & 43.65 & N/A & 0.65 & 67.35 & 46.96 & N/A & 0.70 & 126.71 & 45.96 & N/A & 0.78 \\
+                 & 96 & 35.76 & 48.89 & N/A & 0.78 & 61.22 & 47.46 & N/A & 0.45 & 67.39 & 49.35 & N/A & 0.49 & 127.43 & 45.99 & N/A & 0.56 \\
+    \midrule
+    VerbalTS     & 24 & 34.83 & 44.87 & N/A & 1.04 & 60.89 & 42.44 & N/A & 0.87 & 67.28 & 41.50 & N/A & 0.89 & 126.62 & 43.78 & N/A & 0.98 \\
+                 & 48 & 35.10 & 45.82 & N/A & 0.90 & 61.72 & 43.82 & N/A & 0.66 & 67.34 & 47.16 & N/A & 0.69 & 126.71 & 45.53 & N/A & 0.79 \\
+                 & 96 & 35.75 & 50.25 & N/A & 0.78 & 62.25 & 45.65 & N/A & 0.45 & 67.40 & 48.45 & N/A & 0.47 & 127.31 & 46.66 & N/A & 0.57 \\
+    \midrule
+    ChatTraffic  & 24 & 26.17 & 37.59 & 0.43 & 1.06 & 45.58 & 35.04 & 0.64 & 0.86 & 53.88 & 30.34 & 0.68 & 0.90 & 70.83 & 35.78 & 0.74 & 0.88 \\
+                 & 48 & 26.55 & 40.86 & 0.47 & 0.93 & 46.42 & 38.51 & 0.65 & 0.68 & 54.43 & 31.31 & 0.71 & 0.69 & 70.84 & 35.97 & 0.75 & 0.85 \\
+                 & 96 & 27.45 & 46.15 & 0.49 & 0.80 & 47.94 & 38.83 & 0.66 & 0.47 & 55.67 & 40.37 & 0.75 & 0.48 & 72.83 & 35.99 & 0.75 & 0.81 \\
+    \midrule
+    T2S          & 24 & 21.14 & 22.47 & 0.45 & 1.05 & 38.11 & 24.65 & 0.53 & 0.86 & 46.15 & 29.28 & 0.68 & 0.90 & 64.57 & 22.38 & 0.73 & 0.96 \\
+                 & 48 & 21.50 & 28.32 & 0.47 & 0.92 & 38.83 & 29.03 & 0.54 & 0.72 & 46.21 & 29.96 & 0.70 & 0.76 & 64.69 & 22.52 & 0.75 & 0.92 \\
+                 & 96 & 22.37 & 35.84 & 0.47 & 0.78 & 39.10 & 29.19 & 0.58 & 0.53 & 46.34 & 31.65 & 0.73 & 0.53 & 65.11 & 22.80 & 0.75 & 0.85 \\
+    \midrule
+    Net-Ev2      & 24 & 20.62 & 20.52 & 0.53 & 0.85 & 32.11 & 23.48 & 0.68 & 0.65 & 43.00 & 28.60 & 0.76 & 0.61 & 57.88 & 20.46 & 0.77 & 0.64 \\
+                 & 48 & 20.99 & 22.77 & 0.55 & 0.66 & 32.32 & 27.77 & 0.69 & 0.41 & 43.92 & 29.07 & 0.77 & 0.41 & 58.02 & 20.61 & 0.78 & 0.53 \\
+                 & 96 & 21.88 & 29.09 & 0.59 & 0.63 & 32.91 & 29.15 & 0.70 & 0.38 & 44.08 & 30.95 & 0.77 & 0.40 & 58.85 & 20.71 & 0.78 & 0.41 \\
+    \bottomrule
+  \end{tabular}%
+  }
+\end{table}
 
+\subsection{Experimental setup}
+
+\textbf{Implementation Details}
+\begin{itemize}
+  \item PyTorch 2.3.1+cu121
+  \item Python 3.10
+  \item Four NVIDIA RTX A800 GPUs
+  \item Adam optimizer initial learning rate of 0.0001
+  \item Samples split chronologically, 80\%/20\% Train/Test Split
+\end{itemize}
+
+\noindent\textbf{Baselines}
+\begin{itemize}
+  \item Diffusion-TS
+  \item VerbalITS
+  \item ChatTraffic
+  \item T2S
+\end{itemize}
+
+\noindent\textbf{Evaluation Metrics}
+\begin{itemize}
+  \item Euclidean distance: Point wise distance between generated and ground truth sequences
+  \item Context Fréchet Inception Distance: Semantic distance of latent space
+  \item Contrastive Time series Text Pretraining: CLIP-style cross-modal retrieval
+  \item Johnson-Lindenstrauss Maximum Mean Discrepancy (JL-MMD)
+\end{itemize}
+
+\section{Case Studies}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figs/case1.png}
+\label{fig:case1}
+\caption{(a)}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figs/case2.png}
+\label{fig:case2}
+\caption{(b)}
+\end{figure}
+
+Case study (a) shows event propogation between subsequent nodes and direction-specific disruptions
+
+Case study (b) shows varied intensities based on natural-language input
 
 \bibliographystyle{plainnat}
 \bibliography{references}
