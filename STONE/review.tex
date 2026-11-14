@@ -76,9 +76,46 @@ Spatio-temporal data mining, Out-of-distribution generalization, Traffic predict
   e_\text{tr}:\{\textbf{X}_\text{tr},\textbf{G}_\text{tr}\} \neq e_\text{tr}:\{\textbf{X}_\text{te},\textbf{G}_\text{te}\},\enspace \text{P}(\textbf{X}_\text{te}) = \text{P}(\textbf{X}_\text{tr}), \enspace\textbf{G}_\text{tr}\neq\textbf{G}_\text{tr}
 \]
 
-and existing models have two OOD limitations: \textit{inflexible scalability} and \textit{unreliable generalization}. Main reason is that GCN pretrains on static training graphs and cannot then generalize to new nodes.
+\noindent and existing models have two OOD limitations: \textit{inflexible scalability} and \textit{unreliable generalization}. Main reason is that GCN pretrains on static training graphs and cannot then generalize to new nodes.
 
-Causal learning can be used to address OOD problems but spatio-temporal 
+Causal learning can be used to address OOD problems but spatio-temporal OOD has two major challenges: (1) How to leverage GCN to learn representations resilient to spatio-temporal shifts and (2) how to design mechanisms to enhance environmental modeling for robust generalization.
+
+Paper proposes a novel causal graph learning framework that extracts invariant spatio-temporal dependencies that are consistent across many STG distributions.To generate STG distributions, model spatio-temporal shifts by perturbing learned node dependencies instead of direct manipulation
+
+\textbf{Contributions}
+
+\begin{itemize}
+  \item First investigation of spatio-temporal OOD considering temporal and spatial shifts
+  \item Propose novel STONE framework which aims to learn invariant nodal dependencies
+  \item Incorporates Fréchet embeddings,and graph intervention and loss to enhance generalizability
+  \item Model achieves competitive generalization and scalability
+\end{itemize}
+
+\section{Problem Preliminaries}
+
+\subsubsection{Spatio-temporal graph (STG)}
+A graph structure $\mathbf{G}=(V, E, \mathbf{A})$ where $V$ is the node set and $N$ nodes, $E$ is the set of edges, and $\mathbf{A}\in\mathbb{R}^{N\times N}$. $x_t\in\mathbb{R}^{N\times d}$ is used to represent historical graph data of $N$ nodes at the $t$-th time step with $d$ number of features.
+
+\subsubsection{Spatio-temporal graph prediction} Given a training environment $e$ consisting of graph \textbf{G} and trainign data \textbf{X}, prediction aims to learn function $\mathcal{F}$ that takes data from the prevous \textit{T} time steps as input $\mathbf{x}\in\mathbb{R}^{T\times N\times d} = \{x_1,\ldots, x_T\}$ sampled from \textbf{X}, to predict future data in $T_p$ time steps. The parameters of $\mathcal{F}$ are optimize by the loss of between predicted and ground truth $y$ as
+
+\[
+\underset{\mathcal{F}}{\text{min}}\,\mathbb{E}_{(\mathbf{x}, y)\sim\text{P}(\mathbf{x},y\vert e^*)}\big[ \mathcal{L}(\mathcal{F}(\mathbf{x}),y) \big]
+\]
+
+\subsubsection{Spatio-temporal OOD learning}
+The goal of ST OOD learning is to find function $\mathcal{F}$ that effectively makes predictions for input graph from any support environments $\mathcal{E}$
+
+\[
+  \underset{\mathcal{F}}{\text{min}}\,\underset{e^*\in\mathcal{E}}{\text{max}}\,\mathbb{E}_{(\mathbf{x}, y)\sim\text{P}(\mathbf{x},y\vert e^*)}\big[ \mathcal{L}(\mathcal{F}(\mathbf{x}),y) \big]
+\]
+
+\textbf{Definition: Self-attention mechanism SA} $(\cdot)$ can learn global correlation between positions in the input sequence, which is widely applied in time series analysis. For input $\mathbf{H}\in\mathbb{R}^{N\times d_h}$, self-attention computes attention coefficient by the dot product operation:
+
+\[
+  \text{A}\enspace (\mathbf{H})=\text{Softmax}\Bigg[ \frac{(\mathbf{H}W_q+b_q)\:(\mathbf{H}W_k+b_k)^\top)}{\sqrt{d_x}} \Bigg]
+\]
+
+To obtain attention matrix with size $N\times N$
 
 \bibliographystyle{plainnat}
 \bibliography{references}
