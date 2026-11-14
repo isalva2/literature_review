@@ -70,8 +70,15 @@ Spatio-temporal data mining, Out-of-distribution generalization, Traffic predict
   \item Spatial shift reffers to the evolution of underlying graph structure. Example is new or removed traffic sensor nodes in network
 \end{enumerate}
 
-\noindent Formally 
+\noindent Formally the OOD challenge is: 
 
+\[
+  e_\text{tr}:\{\textbf{X}_\text{tr},\textbf{G}_\text{tr}\} \neq e_\text{tr}:\{\textbf{X}_\text{te},\textbf{G}_\text{te}\},\enspace \text{P}(\textbf{X}_\text{te}) = \text{P}(\textbf{X}_\text{tr}), \enspace\textbf{G}_\text{tr}\neq\textbf{G}_\text{tr}
+\]
+
+and existing models have two OOD limitations: \textit{inflexible scalability} and \textit{unreliable generalization}. Main reason is that GCN pretrains on static training graphs and cannot then generalize to new nodes.
+
+Causal learning can be used to address OOD problems but spatio-temporal 
 
 \bibliographystyle{plainnat}
 \bibliography{references}
