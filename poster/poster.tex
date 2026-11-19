@@ -142,10 +142,11 @@
         \begin{itemize}
           \item \textbf{Stage 1: Grounding:} Every link attends to the words of the description, so a link can find its own number in the sentence. The output is a probability $p_i$ for each link.
           \item \textbf{Stage 2: Regression} Takes the link features and the mask $\tilde m$ and predicts 24 hourly values per link.
+          \item Fully trained model can interpret and predict natural language scenarios such as  ``5.5 KM of EW2 MAJOR Corridor 359-361 and 635-628 are disrupted in the AB direction''
         \end{itemize}
         \begin{center}
           % trim = left bottom right top (raise the 2nd value to crop more off the bottom)
-          \includegraphics[width=\linewidth, trim=0 8.5cm 0 0, clip]{assets/main.pdf}
+          \includegraphics[width=0.87\linewidth, trim=0 8.5cm 0 0, clip]{assets/main.pdf}
         \end{center}
 
 
@@ -174,12 +175,13 @@
     \end{column}
     \begin{column}{.32\textwidth}
       % column 3
-      \begin{chbox}[stretch]{Results}
+      \fontsize{36}{38}\selectfont % slightly smaller than body (36/40)
+      \begin{chbox}{Results}
         \textbf{Scenario Comprehension}
         \\
-        The model exhibited a high skill ceiling for scenarios that spanned multiple links at the corridor level scale.
+        The model exhibited a high skill ceiling for scenarios that spanned multiple links at the corridor level scale. However, for single link scenarios the model performance suffers due to class imbalance and noise from stochastic modeling. 
         \begin{center}
-        \renewcommand{\arraystretch}{1.5}
+        \renewcommand{\arraystretch}{1.1}
         \begin{tabular}{lrrr}
           \hline
           \textbf{Scenario pattern}
@@ -195,8 +197,34 @@
           \hline
         \end{tabular}
         \end{center}
+
+        \textbf{Time Series Quality and Semantic Reasoning}
+        \\ 
+        The left shows a link-level model output that generalizes the concept of a traffic disruption, showing similar properties to a validation instance of scenario data with similar description embeddings.
+
+        \begin{center}
+          \includegraphics[height=\dimexpr(\linewidth-1cm)*1000/3630\relax]{assets/case1.png}\hspace{1cm}%
+          \includegraphics[height=\dimexpr(\linewidth-1cm)*1000/3630\relax]{assets/case3.png}
+          
+        \end{center}
+        The rights shows a corridor-level BA-side disruption scenario that exhibits a reduction in service on the affected side, but maintains flow in the opposite direction. The model recognizes the semantics regarding flow direction and incorporates that reasoning into predictions.
+        \\\textbf{Network Effects}
+        \begin{center}
+          \includegraphics[width=0.70\linewidth]{assets/case2.png}\\[0.5cm]
+        \end{center}
+        The final figure illustrates the propagating network effects of lane disruptions in the westbound AB direction, affecting not only the scenario corridor but connected laterals and location hubs as well.
       \end{chbox}
+
+      \begin{chbox}[stretch]{Conclusion}
+      The \textbf{\textls{\textsc{Scenes}}} model represents a new class of \emph{Human Mobility Foundation Models}, data-driven surrogates with the potential to revolutionize the field. With \textbf{\textls{\textsc{Scenes}}}, students, researchers, and policymakers can now propose and explore traffic scenarios and their cascading effects at a speed and convenience previously thought impossible.
+      
+      \end{chbox}
+
+      
+
+
     \end{column}
   \end{columns}
 \end{frame}
+
 \end{document}
