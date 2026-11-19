@@ -83,9 +83,9 @@
       
       We propose \textbf{\textls{\textsc{Scenes}}}, the \textbf{S}cenario-\textbf{C}ontextualized \textbf{E}vent-driven \textbf{N}etwork \textbf{E}volution \textbf{S}imulator, a transformer-based generative model that creates semantically aware traffic state predictions given only a single natural language input. Leveraging synthetic data from POLARIS, Argonne's high-fidelity traffic simulator, the model is trained to recognize and \emph{generalize} over 2{,}000 POLARIS simulation runs seeded with disruption conditions of varying intensity. The model exhibits state-of-the-art performance capable of the following properties:
       \begin{itemize}
-        \item Able identify link locations, flow directionality, and disruption severity 
-        \item Network-wide displaying displaying propogating disruption effects
-        \item Near instantaneous inference and results generation
+        \item Able identify link locations, flow direction, and disruption severity 
+        \item Network-wide predictions exhibiting propagation effects and toplogical/physical consistency
+        \item Near instantaneous inference and results generation ($ < 0.6$s)
       \end{itemize}
 
       % \hspace*{1.5em} The \textbf{\textls{\textsc{Scenes}}} model represents a new class of \emph{Human Mobility Foundation Models}, data-driven surrogates with the potential to revolutionize the field. With \textbf{\textls{\textsc{Scenes}}}, students, researchers, and policymakers can now propose and explore traffic scenarios and their cascading effects at a speed and convenience previously thought impossible.
@@ -106,15 +106,15 @@
       \end{chbox}
 
       \begin{chbox}[stretch]{Data Description}
-        \textbf{Data sources}
+        \textbf{Data Sources}
         \begin{itemize}
           \item \textbf{Scenarios:} 2{,}133 POLARIS \textit{Grid Network} simulations initialized with five disruption patterns: single link, bi-directional single link, intersection, corridor, and bi-directional.
-          \item \textbf{Text:} A local LLM, \texttt{mimo\-v2.6\-9B}, used to write description labels for each \textit{Grid Network} scenario run.
+          \item \textbf{Text:} A local LLM, \texttt{mimo-v2.6-9B}, used to write description labels for each \textit{Grid Network} scenario run.
           \item \textbf{Graph:} 11 link features (lanes, speed, capacity, length, class) and adjacency matrix.
-          \item \textbf{Embedding:} Frozen \texttt{MiniLM\-L6\-v2} text encoder embeds text descriptions as contextual information.
+          \item \textbf{Embedding:} Frozen \texttt{MiniLM-L6-v2} text encoder embeds text descriptions as contextual information.
         \end{itemize}
 
-        \textbf{Tensor summary}
+        \textbf{Tensor Summary}
 
         \begin{center}
         \renewcommand{\arraystretch}{1.5}
@@ -123,9 +123,9 @@
           \textbf{Tensor} & \textbf{Shape} \\
           \hline
           Volumes $\mathbf{X}$ & $N_\text{runs}$ $\times$ $1{,}028$ links $\times$ $24$ hours \\
-          Affected-link mask $m$ & $N_\text{runs}$ $\times$ $1{,}028$ \\
-          Link features, adjacency & $1028 \times 11$, $1028 \times 1028$ \\
-          Text embeddings & runs $\times$ 384 (sentence), runs $\times$ tokens $\times$ 384 \\
+          Affected-link mask $m$ & $N_\text{runs}$ $\times$ $1{,}028$ links \\
+          Features, adjacency & $1028 \times 11$, $1028 \times 1028$ \\
+          Text embeddings & runs $\times$ $384$ (sentence), runs $\times$ tokens $\times$ $384$ \\
           \hline
         \end{tabular}
         \end{center}
