@@ -11,11 +11,26 @@
 % rounded box: \begin{chbox}{Title} ... \end{chbox}
 \newlength{\radius}    \setlength{\radius}{0.6cm}    % corner radius
 \newlength{\boxpad}    \setlength{\boxpad}{0.6cm}   % inner padding
-\newtcolorbox{chbox}[1]{enhanced, frame hidden, interior hidden, boxrule=0pt,
+% optional first arg takes tcolorbox keys, e.g. \begin{chbox}[stretch]{Title}
+\newtcolorbox{chbox}[2][]{enhanced, frame hidden, interior hidden, boxrule=0pt,
   left=\boxpad, right=\boxpad, top=\boxpad, bottom=\boxpad,
   underlay={\path[rounded corners=\radius, draw=bordercol, fill=white, fill opacity=0.85, line width=5pt]
     (frame.south west) rectangle (frame.north east);},
-  before upper={{\fontsize{56}{64}\selectfont\bfseries #1\par}\vspace{0.3cm}}}
+  before upper={{\fontsize{56}{64}\selectfont\bfseries #2\par}\vspace{0.3cm}}, #1}
+
+% bottom margin: [stretch] on the LAST chbox of a column makes it reach down to
+% \footmargin above the page bottom (clears the footer logos).
+% Needs two compiles after layout changes (box positions are read from the .aux file).
+\usepackage{zref-savepos}
+\newlength{\footmargin}  \setlength{\footmargin}{4.8cm}  % page bottom -> bottom of boxes
+\newcounter{stretchbox}
+\tcbset{stretch/.code={%
+  \stepcounter{stretchbox}%
+  \edef\stretchlabel{stretch\arabic{stretchbox}}%
+  \edef\next{\noexpand\tcbset{phantom={\noexpand\zsaveposy{\stretchlabel}}}}\next
+  \ifnum\zposy{\stretchlabel}>0
+    \tcbset{height=\dimexpr\zposy{\stretchlabel}sp-\footmargin\relax}%
+  \fi}}
 % \usepackage{ebgaramond}
 
 \usetheme{default}
@@ -28,6 +43,7 @@
 
 
 \usefonttheme{serif}
+\usefonttheme{professionalfonts}
 \renewcommand{\familydefault}{\rmdefault}
 
 % vertical spacing controls (adjust to align with background)
@@ -52,8 +68,8 @@
     {\fontsize{40}{48}\selectfont Isaac Salvador, Advisor: Sybil Derrible, Mentors: Natalia Zuniga$^1$, Arindam Fadikar$^1$, Gopindra Nair$^1$\hfill $^1$Argonne National Laboratory, Lemont, IL\par}
   \end{flushleft}
 
-  \vspace{\bodygap}
-  \fontsize{36}{40}\selectfont
+  % \vspace{cm}
+  \fontsize{38}{38}\selectfont
   \begin{columns}[t,onlytextwidth]
     \begin{column}{.32\textwidth}
       % column 1
@@ -65,33 +81,99 @@
 
       % The preeminent transportation planning task that informs the majority of research effort in the field is \textbf{scenario evaluation}, asking ``what if?'', and using those possibilities to predict future traffic and network states. Existing approaches such as agent-based modeling and graph-based machine learning techniques are either computationally burdensome or limited in scope, respectively.
       
-      \hspace*{1.5em}We propose \textbf{\textls{\textsc{Scenes}}}, the \textbf{S}cenario-\textbf{C}ontextualized \textbf{E}vent-driven \textbf{N}etwork \textbf{E}volution \textbf{S}imulator, a transformer-based generative model that creates semantically aware traffic state predictions given only a single natural language input. Leveraging synthetic data from POLARIS, Argonne's high-fidelity traffic simulator, the model is trained to recognize and \emph{generalize} over 2{,}000 POLARIS simulation runs seeded with disruption conditions of varying intensity. The model exhibits state-of-the-art performance capable of the following properties:
+      We propose \textbf{\textls{\textsc{Scenes}}}, the \textbf{S}cenario-\textbf{C}ontextualized \textbf{E}vent-driven \textbf{N}etwork \textbf{E}volution \textbf{S}imulator, a transformer-based generative model that creates semantically aware traffic state predictions given only a single natural language input. Leveraging synthetic data from POLARIS, Argonne's high-fidelity traffic simulator, the model is trained to recognize and \emph{generalize} over 2{,}000 POLARIS simulation runs seeded with disruption conditions of varying intensity. The model exhibits state-of-the-art performance capable of the following properties:
       \begin{itemize}
         \item Able identify link locations, flow directionality, and disruption severity 
         \item Network-wide displaying displaying propogating disruption effects
         \item Near instantaneous inference and results generation
       \end{itemize}
 
-      \hspace*{1.5em} The \textbf{\textls{\textsc{Scenes}}} model represents a new class of \emph{Human Mobility Foundation Models}, data-driven surrogates with the potential to revolutionize the field. With \textbf{\textls{\textsc{Scenes}}}, students, researchers, and policymakers can now propose and explore traffic scenarios and their cascading effects at a speed and ease previously thought impossible.
+      % \hspace*{1.5em} The \textbf{\textls{\textsc{Scenes}}} model represents a new class of \emph{Human Mobility Foundation Models}, data-driven surrogates with the potential to revolutionize the field. With \textbf{\textls{\textsc{Scenes}}}, students, researchers, and policymakers can now propose and explore traffic scenarios and their cascading effects at a speed and convenience previously thought impossible.
 
       \end{chbox}
 
       \begin{chbox}{Problem Statement}
+        Given text description $d$, a \textit{lane reduction disruption}, and directed network graph $G=(V,A)$, predict the hourly volumes $\hat{\mathbf{X}}$ and affected links $p$:
+        \[
+          d \overset{\textit{G}}{\rightarrow}(\hat{\mathbf{X}}, p), \enspace \hat{\mathbf{X}}\in\mathbb{R}^{N\times T} \enspace p_i \approx \mathrm{P}(\mathrm{link}\, i \, \mathrm{affected}\,\vert\,d),
+        \]
+        for a graph of $N=1028$ edges for $T=24$-hour time steps. This problem is further exacerbated by the following constraints:
+        \begin{enumerate}
+          \item \textbf{Geospatial semantics:} the POLARIS \textit{Grid Network} was used and does not encode real-world geographic information.
+          \item \textbf{Model run noise:} Disruption-affected links exhibit 2\% of total variance, necessitating a localized error measure.
+        \end{enumerate}
         
+      \end{chbox}
+
+      \begin{chbox}[stretch]{Data Description}
+        \textbf{Data sources}
+        \begin{itemize}
+          \item \textbf{Scenarios:} 2{,}133 POLARIS \textit{Grid Network} simulations initialized with five disruption patterns: single link, bi-directional single link, intersection, corridor, and bi-directional.
+          \item \textbf{Text:} A local LLM, \texttt{mimo\-v2.6\-9B}, used to write description labels for each \textit{Grid Network} scenario run.
+          \item \textbf{Graph:} 11 link features (lanes, speed, capacity, length, class) and adjacency matrix.
+          \item \textbf{Embedding:} Frozen \texttt{MiniLM\-L6\-v2} text encoder embeds text descriptions as contextual information.
+        \end{itemize}
+
+        \textbf{Tensor summary}
+
+        \begin{center}
+        \renewcommand{\arraystretch}{1.5}
+        \begin{tabular}{ll}
+          \hline
+          \textbf{Tensor} & \textbf{Shape} \\
+          \hline
+          Volumes $\mathbf{X}$ & $N_\text{runs}$ $\times$ $1{,}028$ links $\times$ $24$ hours \\
+          Affected-link mask $m$ & $N_\text{runs}$ $\times$ $1{,}028$ \\
+          Link features, adjacency & $1028 \times 11$, $1028 \times 1028$ \\
+          Text embeddings & runs $\times$ 384 (sentence), runs $\times$ tokens $\times$ 384 \\
+          \hline
+        \end{tabular}
+        \end{center}
       \end{chbox}
 
     \end{column}
     \begin{column}{.32\textwidth}
       % column 2
-      \begin{block}{Test}
-        Test
-      \end{block}
+      \begin{chbox}[stretch]{Methodology}
+        \textbf{Model Architecture}
+        \begin{itemize}
+          \item \textbf{Stage 1: Grounding:} Every link attends to the words of the description, so a link can find its own number in the sentence. The output is a probability $p_i$ for each link.
+          \item \textbf{Stage 2: Regression} Takes the link features and the mask $\tilde m$ and predicts 24 hourly values per link.
+        \end{itemize}
+        \begin{center}
+          % trim = left bottom right top (raise the 2nd value to crop more off the bottom)
+          \includegraphics[width=\linewidth, trim=0 8.5cm 0 0, clip]{assets/main.pdf}
+        \end{center}
+
+
+      \textbf{Training and Inference} \\
+      During training, stage 2 receives 50\% true mask and 50\% $p$, teacher learning from clean masks and generalizing. During inference only the text available, so $\tilde m = p$ and plain 
+ 
+      % \hspace*{1.5em}Each graph block applies a text-conditioned scale and shift (FiLM), attends to the words, and message passes volume information along the road graph:
+
+      \textbf{Loss Function} \\
+      Losses are weighted based on proximity to disruption location, with far-away cells contributing minimal simulation noise and affected links weighted $20\times$ more than 1-hop neighbors:
+      \[
+      \mathcal{L} = \underbrace{\textstyle\sum w_{r,i}\,(\hat y_{r,i} - y_{r,i})^2}_{\text{weighted volume error}} \, + \, \underbrace{0.1\mathrm{BCE}(p, m)}_{\text{which links are affected}}
+      \]
+      \textbf{Evaluation} \\
+      \textit{Skill} is evaluated over the global average, affected links, and k-hop neighbors. For $\mathcal{A}$, affected links:
+      \[
+      \mathrm{skill}_{\mathcal{A}} = 1 - \frac{\sum_{\mathcal{A}} (\hat y - y)^2}{\sum_{\mathcal{A}} y^2}
+      \]
+      
+      is 1 for a perfect model and 0 for the baseline. We also report the share of the truly affected links among the model's top-$k$ guesses.
+
+ 
+
+
+      \end{chbox}
     \end{column}
     \begin{column}{.32\textwidth}
       % column 3
-      \begin{block}{Test}
-        Test
-      \end{block}
+      \begin{chbox}[stretch]{Test}
+        test
+      \end{chbox}
     \end{column}
   \end{columns}
 \end{frame}
