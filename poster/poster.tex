@@ -3,7 +3,7 @@
 \usepackage{graphicx,multicol}
 \usepackage[most]{tcolorbox}
 \usepackage{microtype}
-\usepackage{ebgaramond}
+\usepackage{libertinus-type1}  % text font (was ebgaramond)
 
 \usetikzlibrary{calc}
 \definecolor{bordercol}{HTML}{00609C}
@@ -83,7 +83,7 @@
       
       We propose \textbf{\textls{\textsc{Scenes}}}, the \textbf{S}cenario-\textbf{C}ontextualized \textbf{E}vent-driven \textbf{N}etwork \textbf{E}volution \textbf{S}imulator, a transformer-based generative model that creates semantically aware traffic state predictions given only a single natural language input. Leveraging synthetic data from POLARIS, Argonne's high-fidelity traffic simulator, the model is trained to recognize and \emph{generalize} over 2{,}000 POLARIS simulation runs seeded with disruption conditions of varying intensity. The model exhibits state-of-the-art performance capable of the following properties:
       \begin{itemize}
-        \item Able identify link locations, flow direction, and disruption severity 
+        \item Identify link locations, flow direction, and disruption severity 
         \item Network-wide predictions exhibiting propagation effects and toplogical/physical consistency
         \item Near instantaneous inference and results generation ($ < 0.6$s)
       \end{itemize}
@@ -116,19 +116,22 @@
 
         \textbf{Tensor Summary}
 
+        {
         \begin{center}
-        \renewcommand{\arraystretch}{1.5}
+        \renewcommand{\arraystretch}{1.1}
         \begin{tabular}{ll}
+          % \fontsize{32}{36}
           \hline
           \textbf{Tensor} & \textbf{Shape} \\
           \hline
           Volumes $\mathbf{X}$ & $N_\text{runs}$ $\times$ $1{,}028$ links $\times$ $24$ hours \\
           Affected-link mask $m$ & $N_\text{runs}$ $\times$ $1{,}028$ links \\
           Features, adjacency & $1028 \times 11$, $1028 \times 1028$ \\
-          Text embeddings & runs $\times$ $384$ (sentence), runs $\times$ tokens $\times$ $384$ \\
+          Text embeddings & \begin{tabular}[t]{@{}l@{}}runs $\times$ $384$ (sentence),\\ runs $\times$ tokens $\times$ $384$\end{tabular} \\
           \hline
         \end{tabular}
         \end{center}
+        }
       \end{chbox}
 
     \end{column}
@@ -171,8 +174,27 @@
     \end{column}
     \begin{column}{.32\textwidth}
       % column 3
-      \begin{chbox}[stretch]{Test}
-        test
+      \begin{chbox}[stretch]{Results}
+        \textbf{Scenario Comprehension}
+        \\
+        The model exhibited a high skill ceiling for scenarios that spanned multiple links at the corridor level scale.
+        \begin{center}
+        \renewcommand{\arraystretch}{1.5}
+        \begin{tabular}{lrrr}
+          \hline
+          \textbf{Scenario pattern}
+            & \textbf{\begin{tabular}[b]{@{}r@{}}Test Runs\end{tabular}}
+            & \textbf{\begin{tabular}[b]{@{}r@{}}Affected Link\end{tabular}}
+            & \textbf{\begin{tabular}[b]{@{}r@{}}Skill \end{tabular}} \\
+          \hline
+          Two-way corridor & 45 & 8.6 & 0.51 \\
+          Corridor & 124 & 4.2 & 0.33 \\
+          Single link & 26 & 1 & 0.10 \\
+          Intersection & 9 & 2 & 0.01 \\
+          Bi-directional link & 11 & 2 & \textminus 0.02 \\
+          \hline
+        \end{tabular}
+        \end{center}
       \end{chbox}
     \end{column}
   \end{columns}
