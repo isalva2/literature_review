@@ -15,7 +15,7 @@
   left=\boxpad, right=\boxpad, top=\boxpad, bottom=\boxpad,
   underlay={\path[rounded corners=\radius, draw=bordercol, fill=white, fill opacity=0.85, line width=5pt]
     (frame.south west) rectangle (frame.north east);},
-  before upper={{\fontsize{56}{64}\selectfont\bfseries #1\par}\vspace{0.6cm}}}
+  before upper={{\fontsize{56}{64}\selectfont\bfseries #1\par}\vspace{0.3cm}}}
 % \usepackage{ebgaramond}
 
 \usetheme{default}
@@ -42,13 +42,13 @@
 
 \begin{document}
 \begin{frame}[t]
-  \vspace*{\topgap}
+  \vspace*{0.8cm}
   \begin{flushleft}
   \color{white}
-  {\fontsize{80}{90}\selectfont\bfseries\textls{\textbf{SCENES}}: Scenario-Contextualized Event-driven Network Evolution Simulator\par}
+  {\fontsize{90}{100}\selectfont\bfseries\textbf{\textls{\textsc{Scenes}}}: Scenario-Contextualized Event-driven Network Evolution Simulator\par}
     \vspace{0.5cm}
     {\fontsize{56}{64}\selectfont Christopher Burke and Susan S. Burke Civil and Materials Engineering Graduate Student Poster Competition\par}
-    \vspace{2.5cm}
+    \vspace{3.0cm}
     {\fontsize{40}{48}\selectfont Isaac Salvador, Advisor: Sybil Derrible, Mentors: Natalia Zuniga$^1$, Arindam Fadikar$^1$, Gopindra Nair$^1$\hfill $^1$Argonne National Laboratory, Lemont, IL\par}
   \end{flushleft}
 
@@ -58,10 +58,26 @@
     \begin{column}{.32\textwidth}
       % column 1
       \begin{chbox}{Introduction}
-      The preeminent transportation planning task that informs the majority of research effort in this domain is \textbf{scenario evaluation}, asking ``what if?''~and using those possibilities to predict future traffic and network states. Existing approaches such as agent-based modeling and graph-based machine learning techniques are either computationally burdensome or limited in scope, respectively. Furthermore, both methods are calibrated and validated on real world sensor data that can be absent or unreliable during out-of-distribution events like extreme weather or large-scale network degradation.
+      % The preeminent transportation planning task that informs the majority of research effort in the field is \textbf{scenario evaluation}, asking ``what if?'', and using those possibilities to predict future traffic and network states. Existing approaches such as agent-based modeling and graph-based machine learning techniques are either computationally burdensome or limited in scope, respectively. Furthermore, both methods are calibrated and validated on real world sensor data that can be absent or unreliable during out-of-distribution events like extreme weather or large-scale network degradation.
 
-      To this end, we propose \textbf{\textls{\textsc{Scenes}}}, a novel \textbf{S}cenario-\textbf{C}ontextualized \textbf{E}vent-driven \textbf{N}etwork \textbf{E}volution \textbf{S}imulator, a generative model that produces semantically aware traffic state time-series predictions given a natural language input.
+      
+      % \hspace*{1.5em}To this end, we propose \textbf{\textls{\textsc{Scenes}}}, the \textbf{S}cenario-\textbf{C}ontextualized \textbf{E}vent-driven \textbf{N}etwork \textbf{E}volution \textbf{S}imulator, a transformer-based generative model that produces semantically aware traffic state time-series predictions given only a natural language input. Leveraging synthetic data from POLARIS, Argonne's high-fidelity traffic simulator, the model is trained to recognize and \emph{generalize} over 2{,}000 POLARIS simulation runs seeded with disruption conditions of varying intensity. The model exhibits state-of-the-art performance capable of the following properties:
 
+      % The preeminent transportation planning task that informs the majority of research effort in the field is \textbf{scenario evaluation}, asking ``what if?'', and using those possibilities to predict future traffic and network states. Existing approaches such as agent-based modeling and graph-based machine learning techniques are either computationally burdensome or limited in scope, respectively.
+      
+      \hspace*{1.5em}We propose \textbf{\textls{\textsc{Scenes}}}, the \textbf{S}cenario-\textbf{C}ontextualized \textbf{E}vent-driven \textbf{N}etwork \textbf{E}volution \textbf{S}imulator, a transformer-based generative model that creates semantically aware traffic state predictions given only a single natural language input. Leveraging synthetic data from POLARIS, Argonne's high-fidelity traffic simulator, the model is trained to recognize and \emph{generalize} over 2{,}000 POLARIS simulation runs seeded with disruption conditions of varying intensity. The model exhibits state-of-the-art performance capable of the following properties:
+      \begin{itemize}
+        \item Able identify link locations, flow directionality, and disruption severity 
+        \item Network-wide displaying displaying propogating disruption effects
+        \item Near instantaneous inference and results generation
+      \end{itemize}
+
+      \hspace*{1.5em} The \textbf{\textls{\textsc{Scenes}}} model represents a new class of \emph{Human Mobility Foundation Models}, data-driven surrogates with the potential to revolutionize the field. With \textbf{\textls{\textsc{Scenes}}}, students, researchers, and policymakers can now propose and explore traffic scenarios and their cascading effects at a speed and ease previously thought impossible.
+
+      \end{chbox}
+
+      \begin{chbox}{Problem Statement}
+        
       \end{chbox}
 
     \end{column}
