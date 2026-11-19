@@ -1,0 +1,82 @@
+\documentclass[final]{beamer}
+\usepackage[size=custom,width=121.92,height=91.44,scale=1.6]{beamerposter}
+\usepackage{graphicx,multicol}
+\usepackage[most]{tcolorbox}
+\usepackage{microtype}
+\usepackage{ebgaramond}
+
+\usetikzlibrary{calc}
+\definecolor{bordercol}{HTML}{00609C}
+
+% rounded box: \begin{chbox}{Title} ... \end{chbox}
+\newlength{\radius}    \setlength{\radius}{0.6cm}    % corner radius
+\newlength{\boxpad}    \setlength{\boxpad}{0.6cm}   % inner padding
+\newtcolorbox{chbox}[1]{enhanced, frame hidden, interior hidden, boxrule=0pt,
+  left=\boxpad, right=\boxpad, top=\boxpad, bottom=\boxpad,
+  underlay={\path[rounded corners=\radius, draw=bordercol, fill=white, fill opacity=0.85, line width=5pt]
+    (frame.south west) rectangle (frame.north east);},
+  before upper={{\fontsize{56}{64}\selectfont\bfseries #1\par}\vspace{0.6cm}}}
+% \usepackage{ebgaramond}
+
+\usetheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{background canvas}{%
+  \includegraphics[width=\paperwidth,height=\paperheight]{assets/IS_ANL_CBB_SCENES.pdf}}
+\setbeamercolor{block title}{bg=black!70,fg=white}
+\setbeamercolor{block body}{bg=white!92!black,fg=black}
+\setbeamersize{text margin left=3cm, text margin right=3cm}
+
+
+\usefonttheme{serif}
+\renewcommand{\familydefault}{\rmdefault}
+
+% vertical spacing controls (adjust to align with background)
+\newlength{\topgap}      \setlength{\topgap}{2cm}       % page top -> title
+\newlength{\titlesubgap} \setlength{\titlesubgap}{2cm}  % title -> subheading
+\newlength{\subauthorgap}\setlength{\subauthorgap}{2cm} % subheading -> authors
+\newlength{\bodygap}     \setlength{\bodygap}{2cm}      % authors -> columns
+
+\title{Poster Title}
+\author{Isaac Salvador}
+\institute{Institution}
+
+\begin{document}
+\begin{frame}[t]
+  \vspace*{\topgap}
+  \begin{flushleft}
+  \color{white}
+  {\fontsize{80}{90}\selectfont\bfseries\textls{\textbf{SCENES}}: Scenario-Contextualized Event-driven Network Evolution Simulator\par}
+    \vspace{0.5cm}
+    {\fontsize{56}{64}\selectfont Christopher Burke and Susan S. Burke Civil and Materials Engineering Graduate Student Poster Competition\par}
+    \vspace{2.5cm}
+    {\fontsize{40}{48}\selectfont Isaac Salvador, Advisor: Sybil Derrible, Mentors: Natalia Zuniga$^1$, Arindam Fadikar$^1$, Gopindra Nair$^1$\hfill $^1$Argonne National Laboratory, Lemont, IL\par}
+  \end{flushleft}
+
+  \vspace{\bodygap}
+  \fontsize{36}{40}\selectfont
+  \begin{columns}[t,onlytextwidth]
+    \begin{column}{.32\textwidth}
+      % column 1
+      \begin{chbox}{Introduction}
+      The preeminent transportation planning task that informs the majority of research effort in this domain is \textbf{scenario evaluation}, asking ``what if?''~and using those possibilities to predict future traffic and network states. Existing approaches such as agent-based modeling and graph-based machine learning techniques are either computationally burdensome or limited in scope, respectively. Furthermore, both methods are calibrated and validated on real world sensor data that can be absent or unreliable during out-of-distribution events like extreme weather or large-scale network degradation.
+
+      To this end, we propose \textbf{\textls{\textsc{Scenes}}}, a novel \textbf{S}cenario-\textbf{C}ontextualized \textbf{E}vent-driven \textbf{N}etwork \textbf{E}volution \textbf{S}imulator, a generative model that produces semantically aware traffic state time-series predictions given a natural language input.
+
+      \end{chbox}
+
+    \end{column}
+    \begin{column}{.32\textwidth}
+      % column 2
+      \begin{block}{Test}
+        Test
+      \end{block}
+    \end{column}
+    \begin{column}{.32\textwidth}
+      % column 3
+      \begin{block}{Test}
+        Test
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+\end{document}
