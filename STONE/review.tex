@@ -117,6 +117,54 @@ The goal of ST OOD learning is to find function $\mathcal{F}$ that effectively m
 
 To obtain attention matrix with size $N\times N$
 
+\section{METHOD}
+
+\subsection{Overview}
+STONE has three main modules:
+\begin{enumerate}
+  \item Semantic graph learning
+  \item Spatio-temporal graph convolutional
+  \item Graph intervention
+\end{enumerate}
+
+\textbf{Spatio-temporal graph learning module}\\
+\noindent Input data $\mathbf{x}\in\mathbb{R}^{T\times N \times d}$ and adjacency matrix $\mathbf{A}\in\mathbb{R}^{N\times N}$ passed through embedding layers that integrates static information. Passed to gated transformers to capture spatio-temporal heterogeneity. Used to generate two types of graphs:
+\begin{enumerate}
+  \item Spatial semantic graph, $D_s$, encoding spatial topology and describing affinity between nodes based on position in graph
+  \item Temporal semantic graph, $D_t$, captures similarities of time-varying features and temporal dependencies.
+\end{enumerate}
+
+\textbf{Graph intervention mechanism}\\
+Used a graph intervention mechanism for OOD learning. Mechanism perturbs the semantic graphs $D_s$ and $D_t$ by masking edges in them. Process simulates spatial and temporal shifts, creating diverse distribution of intervention environments.
+
+By extracting invariant spatiotemporal dependencies we can generate generalizable node representations.
+
+\subsubsection{Spatial Semantic Graph Learning}
+
+\textbf{Node embedding}\\
+Node embeddings enhance predictions by incorporating graph topology, but struggle with spatial shifts. Example, \textit{node2vec} uses random-walk to sample local substructure, which is sensitive to temporal shifts.
+
+\textbf{Definition 1: Fréchet Embedding} For metric space $(V, d_V)$, define function $f:V\rightarrow \ell_p^{d_e}$ as \textit{Fréchet Embedding}, if coordinates $f_i$ is proportional to anchor sets $\mathcal{V}$:
+\[
+  f_i (u)=\alpha_i\cdot d_V(u,\mathcal{V}_i)=\alpha\cdot\underset{u\in V_i}{\min}\,d_V(u,v),\quad \forall u\in V, \forall i= 1,\ldots,d
+\]
+\begin{itemize}
+  \item $\mathcal{V}_i$ is the $i-$th anchor of $d_e$ anchors
+  \item $\alpha_i$ is a numeric factor
+  \item $V$ is the node set
+  \item Metric function $d_V(\cdot)$ on the set $V$ is called an $\ell_p$ metric if natural number $d_e$ exists of an embedding $(V,d)$ in the space $\ell_p^{d_e}$
+  \item For example $p=2$ would be a euclidean metric for $\ell_2$
+\end{itemize}
+
+\noindent\textbf{Proposition 1: Spatio-temporal graph Fréchet embedding}
+\begin{itemize}
+  \item To define Fréchet embedding, select K-order Manhattan distance as metric $d_V$ with nodes set of $V$ and $G$ to form metric space $(V,d_V)$
+  \item Each dimension of Fréchet embedding represents minimum of metric between nodes concerning subset $\mathcal{V}$ of set of nodes $V$. This is called the anchor sets
+  \item Obtain $\lceil\log N\rceil$ anchor sets for $R$ rounds of resampling
+  \item Obtain $R\times\lceil log N\rceil$ anchor sets $\{\mathcal{V}\}_1^{R\times\lceil\log N\rceil}$
+  \item For each round $i\in\{1,\ldots,R\}$ sample $N*2^{-j}$ nodes to anchor set $\mathcal{V}_{ij}^1$ for $j\in \{1, 2, \ldots, \lceil\log N\rceil \}$ with the follwing rule: $j-$th anchor set $\mathcal{V}_{ij}$ with probability $2^{-j}$
+\end{itemize}
+
 \bibliographystyle{plainnat}
 \bibliography{references}
 
